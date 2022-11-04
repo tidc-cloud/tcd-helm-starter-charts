@@ -32,10 +32,10 @@ spec:
         {{- include "common.tplvalues.render" ( dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
         {{- end }}
     spec:
-      {{- include "<CHARTNAME>.imagePullSecrets" . | nindent 6 }}
+      {{- include "my-webapp.imagePullSecrets" . | nindent 6 }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       shareProcessNamespace: {{ .Values.sidecarSingleProcessNamespace }}
-      serviceAccountName: {{ template "<CHARTNAME>.serviceAccountName" . }}
+      serviceAccountName: {{ template "my-webapp.serviceAccountName" . }}
       {{- if .Values.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.hostAliases "context" $) | nindent 8 }}
       {{- end }}
@@ -75,8 +75,8 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       containers:
-        - name: <CHARTNAME>
-          image: {{ include "<CHARTNAME>.image" . }}
+        - name: my-webapp
+          image: {{ include "my-webapp.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}

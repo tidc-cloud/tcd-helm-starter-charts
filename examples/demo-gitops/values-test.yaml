@@ -1,0 +1,21 @@
+my-webapp:
+  image:
+    name: nginx
+    tag: 1.23
+  containerPorts:
+    http: 80
+  ingress:
+    enabled: true
+    hostname: my-webapp.13jywld9jdvvv.dev.nxcp.trueidc.com
+
+my-job:
+  image:
+    name: python
+    tag: 3.10.8
+  cronjob:
+    schedule: "* * * * *"
+  command: [python, -c]
+  args:
+    - |
+        print('hello')
+        print('hello2')

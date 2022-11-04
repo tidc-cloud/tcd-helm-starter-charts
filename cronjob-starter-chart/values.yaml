@@ -1,0 +1,382 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imagePullSecrets and storageClass
+
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+##
+global:
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  # storageClass: abs-default
+
+## @section Common parameters
+
+## @param nameOverride String to partially override <CHARTNAME>.fullname template (will maintain the release name)
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override <CHARTNAME>.fullname template
+##
+fullnameOverride: ""
+## @param clusterDomain Kubernetes Cluster Domain
+##
+clusterDomain: cluster.local
+## @param commonLabels Add labels to all the deployed resources
+##
+commonLabels: {}
+## @param commonAnnotations Add annotations to all the deployed resources
+##
+commonAnnotations: {}
+
+## Enable diagnostic mode in the deployment(s)/statefulset(s)
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the the deployment(s)/statefulset(s)
+  ##
+  command:
+    - sleep
+  ## @param diagnosticMode.args Args to override all containers in the the deployment(s)/statefulset(s)
+  ##
+  args:
+    - infinity
+
+## @section <CHARTNAME> parameters
+
+## <CHARTNAME> image version
+## @param image.name <CHARTNAME> image name
+## @param image.tag <CHARTNAME> image tag (immutable tags are recommended)
+## @param image.pullPolicy <CHARTNAME> image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+##
+image:
+  name: <CHARTNAME>
+  tag: ""
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## E.g.:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+
+## @param hostAliases Deployment pod host aliases
+## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+##
+hostAliases: []
+## Command and args for running the container (set to default if not set). Use array form
+## @param command Override default container command (useful when using custom images)
+## @param args Override default container args (useful when using custom images)
+##
+command: []
+args: []
+
+## Environment variables
+## @param env Enviromment variable in dict
+env: {}
+  # DB_PASSWORD: s3cret
+
+## Environment variables from ConfigMaps or Secrets
+## @param envFrom.configmaps List of Configmaps contain environment variables
+## @param envFrom.secrets List of Secret contain environment variables
+envFrom: {}
+  # configmaps: []
+  #   - sample1-cm
+  #   - sample2-cm
+  # secrets: []
+  #   - db-secret
+
+## Volumes
+## @param volumes List of volumes
+## @param volumes[].persistence.enabled Create Persistence Volume Claim as volume
+volumes: []
+  # ## Example with pvc
+  # - name: db-data
+  #   mountPath: /data
+  #   ## Persistence volume
+  #   ## @param volumes.[].enabled Enable volume with PVC or emptyDir
+  #   ## @param storageClass
+  #   persistence:
+  #     enabled: true
+  #     annotations: {}
+  #     storageClass: "abs"
+  #     existingClaim: ""
+  #     size: 1Gi
+  #     accessModes:
+  #       - ReadWriteOnce
+
+  # ## Example for emptyDir volume
+  # - name: tmp
+  #   mountPath: /tmp
+  #   persistence:
+  #     enable: false
+
+  # ## Example Configmap as volume
+  # - name: appconfig
+  #   mountPath: /app/config
+  #   ## ConfigMap volume
+  #   ## Ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#configmapvolumesource-v1-core
+  #   ## @param volumes[].configMap ConfigMap volume source
+  #   configMap:
+  #     name: logging-config-cm
+  #     items:
+  #       - key: LOGGING_CONFIG
+  #         path: logging-config.json
+  # # ## Example Secret as volume
+  # - name: keypair
+  #   mountPath: /ssh
+  #   ## Secrdt volume
+  #   ## ref https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#secretvolumesource-v1-core
+  #   ## @param volumes[].secret Secret volume source
+  #   secret:
+  #     secretName: ssh-keypair
+  #     items:
+  #       - key: SSH_PRIVATE_KEY
+  #         path: id_rsa
+  #       - key: SSH_PUBLIC_KEY
+  #         path: id_rsa.pub
+
+## ConfigMaps
+## @param configmaps.[].name ConfigMap name
+## @param configmaps.[].data Dictionary data
+configMaps: []
+  # - name: logging-config-cm
+  #   annotations: {}
+  #   data:
+  #     LOGGING_CONFIG: |
+  #       handlers:
+  #         console:
+  #           class : logging.StreamHandler
+  #           formatter: brief
+  #           level   : INFO
+  #           filters: [allow_foo]
+  #           stream  : ext://sys.stdout
+  #     key2: value2
+  # - name: cm-2
+  #   data:
+  #     key1: value1
+  #     key2: value2
+
+## Secrets
+## @param secrets.[].name Secret name
+## @param secrets.[].data Dictionary data
+secrets: []
+  # - name: ssh-keypair
+  #   annotations: {}
+  #   data:
+  #     SSH_PRIVATE_KEY: |
+  #       ---BEGIN PRIVATE KEY---
+  #       your
+  #       private
+  #       key
+  #       ---END PRIVATE KEY---
+  #     SSH_PUBLIC_KEY: |
+  #       ---BEGIN PUBLIC KEY---
+  #       public key here
+  #       ---END PUBLIC KEY---
+
+## @section <CHARTNAME> CronJob parameters
+
+## Cronjob
+cronjob:
+  ## @param schedule Schedule in Cron format to save snapshots
+  ## See https://en.wikipedia.org/wiki/Cron
+  ##
+  schedule: "*/30 * * * *"
+  ## @param cronjob.suspend Whether to create suspended CronJob
+  ##
+  suspend: false
+  ## @param cronjob.historyLimit Number of successful finished jobs to retain
+  ##
+  historyLimit: 1
+  ## @param cronjob.snapshotHistoryLimit Number of etcd snapshots to retain, tagged by date
+  ##
+  snapshotHistoryLimit: 1
+  ## @param cronjob.concurrencyPolicy
+  concurrencyPolicy: Forbid
+
+
+## @param podLabels Additional labels for <CHARTNAME> pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+## @param podAnnotations Annotations for <CHARTNAME> pods
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAffinityPreset: ""
+## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAntiAffinityPreset: soft
+## Node affinity preset
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+##
+nodeAffinityPreset:
+  ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  type: ""
+  ## @param nodeAffinityPreset.key Node label key to match Ignored if `affinity` is set.
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## @param nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##
+  values: []
+## @param affinity Affinity for pod assignment
+## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+##
+affinity: {}
+## @param hostNetwork Specify if host network should be enabled for <CHARTNAME> pod
+##
+hostNetwork: false
+## @param hostIPC Specify if host IPC should be enabled for <CHARTNAME> pod
+##
+hostIPC: false
+## @param nodeSelector Node labels for pod assignment. Evaluated as a template.
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+## @param tolerations Tolerations for pod assignment. Evaluated as a template.
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: []
+## @param priorityClassName <CHARTNAME> pods' priorityClassName
+##
+priorityClassName: ""
+
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment
+## https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+## The value is evaluated as a template
+##
+topologySpreadConstraints: []
+
+## <CHARTNAME> pods' Security Context.
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enabled <CHARTNAME> pods' Security Context
+## @param podSecurityContext.fsGroup Set <CHARTNAME> pod's Security Context fsGroup
+## @param podSecurityContext.sysctls sysctl settings of the <CHARTNAME> pods
+##
+podSecurityContext:
+  enabled: false
+  fsGroup: 1001
+  ## sysctl settings
+  ## Example:
+  ## sysctls:
+  ## - name: net.core.somaxconn
+  ##   value: "10000"
+  ##
+  sysctls: []
+
+## <CHARTNAME> containers' Security Context.
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @param containerSecurityContext.enabled Enabled <CHARTNAME> containers' Security Context
+## @param containerSecurityContext.runAsUser Set <CHARTNAME> container's Security Context runAsUser
+## @param containerSecurityContext.runAsNonRoot Set <CHARTNAME> container's Security Context runAsNonRoot
+##
+containerSecurityContext:
+  enabled: false
+  runAsUser: 1001
+  runAsNonRoot: true
+
+## <CHARTNAME> containers' resource requests and limits
+## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+## We usually recommend not to specify default resources and to leave this as a conscious
+## choice for the user. This also increases chances charts run on environments with little
+## resources, such as Minikube. If you do want to specify resources, uncomment the following
+## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @param resources.limits The resources limits for the <CHARTNAME> container
+## @param resources.requests The requested resources for the <CHARTNAME> container
+##
+resources:
+  ## Example:
+  ## limits:
+  ##    cpu: 100m
+  ##    memory: 128Mi
+  limits: {}
+  ## Examples:
+  ## requests:
+  ##    cpu: 100m
+  ##    memory: 128Mi
+  requests: {}
+
+## <CHARTNAME> containers' lifecycleHooks
+## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/
+## If you do want to specify lifecycleHooks, uncomment the following
+## lines, adjust them as necessary, and remove the curly braces on 'lifecycle:{}'.
+## @param lifecycleHooks Optional lifecycleHooks for the NGINX container
+lifecycleHooks: {}
+  ## Example:
+  ## postStart:
+  ##   exec:
+  ##     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  ## Example:
+  ## preStop:
+  ##   exec:
+  ##     command: ["/bin/sleep", "20"]
+  ##     command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
+
+## @param extraVolumes Array to add extra volumes
+##
+extraVolumes: []
+## @param extraVolumeMounts Array to add extra mount
+##
+extraVolumeMounts: []
+## Pods Service Account
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.create Enable creation of ServiceAccount for <CHARTNAME> pod
+  ##
+  create: false
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the `common.names.fullname` template
+  name: ""
+  ## @param serviceAccount.annotations Annotations for service account. Evaluated as a template.
+  ## Only used if `create` is `true`.
+  ##
+  annotations: {}
+  ## @param serviceAccount.automountServiceAccountToken Auto-mount the service account token in the pod
+  ##
+  automountServiceAccountToken: false
+## @param sidecars Sidecar parameters
+## e.g:
+## sidecars:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: Always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+sidecars: []
+
+## @param sidecarSingleProcessNamespace Enable sharing the process namespace with sidecars
+## This will switch pod.spec.shareProcessNamespace parameter
+##
+sidecarSingleProcessNamespace: false
+
+## @param initContainers Extra init containers
+##
+initContainers: []

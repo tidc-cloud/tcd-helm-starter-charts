@@ -1,0 +1,31 @@
+{{- $commonName := include "common.names.fullname" . }}
+{{- $commonLabelsStandard := include "common.labels.standard" . }}
+{{- $commonLabels := .Values.commonLabels }}
+{{- $commonAnnotations := .Values.commmonAnnotations }}
+{{- $namespace := .Release.Namespace | quote }}
+{{- $global := .Values.global }}
+
+{{- range .Values.configMaps }}
+---
+{{- $name := .name }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  namespace: {{ $namespace }}
+  labels: {{- $commonLabelsStandard | nindent 4 }}
+    {{- if $commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" $commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .annotations $commonAnnotations }}
+  annotations:
+    {{- if .annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .persistence.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if $commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+data:
+  {{- .data | toYaml | nindent 2 }}
+{{- end }}
