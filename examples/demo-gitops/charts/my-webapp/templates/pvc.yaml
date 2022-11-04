@@ -1,0 +1,42 @@
+{{- $commonName := include "common.names.fullname" . }}
+{{- $commonLabelsStandard := include "common.labels.standard" . }}
+{{- $commonLabels := .Values.commonLabels }}
+{{- $commonAnnotations := .Values.commmonAnnotations }}
+{{- $namespace := .Release.Namespace | quote }}
+{{- $global := .Values.global }}
+{{- range .Values.volumes }}
+---
+{{- if .persistence }}
+{{- if .persistence.enabled }}
+{{- $volumeName := .name }}
+{{- $pvcName := printf "%s-pvc-%s" $commonName $volumeName }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ $pvcName }}
+  namespace: {{ $namespace }}
+  labels: {{- $commonLabelsStandard | nindent 4 }}
+    {{- if $commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" $commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .persistence.annotations $commonAnnotations }}
+  annotations:
+    {{- if .persistence.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .persistence.annotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if $commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" $commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .persistence.size | quote }}
+  {{- include "common.storage.class" (dict "persistence" .persistence "global" $global) | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}
