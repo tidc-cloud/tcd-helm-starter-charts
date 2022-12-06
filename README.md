@@ -37,7 +37,7 @@ helm create $GITOPS_CHART_NAME/charts/$CHART_NAME --starter tcd/webapp-starter-c
 
 ---
 
-## Create Cron Job application subchart from starter
+## Create Cron Job application sub-chart from starter
 
 ```sh
 GITOPS_CHART_NAME=demo-gitops
