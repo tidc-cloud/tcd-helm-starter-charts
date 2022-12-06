@@ -1,0 +1,1 @@
+# GitOps application chart

@@ -1,0 +1,6 @@
+## - K8s specific settings
+#    - Replicas
+#    - Resources
+#    - HealthCheck
+#    - Affinity
+#    - Persistence Volumes
